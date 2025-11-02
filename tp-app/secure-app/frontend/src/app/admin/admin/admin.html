@@ -1,1 +1,38 @@
-<p>admin works!</p>
+<div class="admin-container">
+  <h1>Administration - Gestion des utilisateurs</h1>
+
+  @if (users() && users().length > 0) {
+    <div class="users-list">
+      <p class="users-count">
+        <strong>{{ users().length }}</strong> utilisateur(s) trouvé(s)
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Login</th>
+            <th>Rôle</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr>
+              <td>{{ user.id }}</td>
+              <td>{{ user.login }}</td>
+              <td>
+                <span class="role-badge" [class.admin]="user.role === 'admin'">
+                  {{ user.role }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="no-users">
+      <p>Pas d'utilisateurs</p>
+    </div>
+  }
+</div>

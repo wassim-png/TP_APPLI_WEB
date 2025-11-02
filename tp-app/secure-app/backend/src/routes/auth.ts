@@ -105,9 +105,23 @@ router.post('/logout', (_req: Request, res: Response) => {
   res.json({ message: 'Déconnexion réussie' })
 })
 
-router.get('/whoami', verifyToken, (req, res) => {
-  res.json({ user: req.user })
-}) 
+router.get('/whoami', verifyToken, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, login, role FROM users WHERE id = $1',
+      [req.user?.id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+
+    res.json({ user: rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
 
 
 

@@ -36,10 +36,13 @@ app.use(express.json())
 app.use(cookieParser())
 // Configuration CORS : autoriser le front Angular en HTTPS local
 app.use(cors({
-    origin: 'https://localhost:4200',
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+  origin: [
+    'https://localhost:4200',  // Angular en dev local
+    'http://localhost:8080'     // Frontend dockerisé (Nginx)
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }))
 // Routes publiques
 app.use('/api/public', publicRouter)
@@ -51,8 +54,8 @@ app.use('/api/admin', verifyToken, requireAdmin, (req, res) => {
 })
 
 // Chargement du certificat et clé générés par mkcert (étape 0)
-const key = fs.readFileSync('../certs/localhost-key.pem')
-const cert = fs.readFileSync('../certs/localhost.pem')
+const key = fs.readFileSync('./certs/localhost-key.pem')
+const cert = fs.readFileSync('./certs/localhost.pem')
 // Lancement du serveur HTTPS
 https.createServer({ key, cert }, app).listen(4000, () => {
     console.log('� Serveur API démarré sur https://localhost:4000')
