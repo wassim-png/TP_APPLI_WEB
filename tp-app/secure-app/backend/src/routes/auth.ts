@@ -9,6 +9,35 @@ import type { TokenPayload } from '../types/token-payload.ts'
 
 const router = Router()
 
+router.post('/register', async (req, res) => {
+  const { login, password } = req.body;
+
+  if (!login || !password) {
+    return res.status(400).json({ error: 'Champs manquants' });
+  }
+
+  const hashed = await bcrypt.hash(password, 10);
+
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO users (login, password_hash, role)
+       VALUES ($1, $2, 'user')
+       RETURNING id, login, role`,
+      [login, hashed]
+    );
+
+    res.status(201).json({ message: 'Utilisateur créé', user: rows[0] });
+  } catch (err) {
+    if (err.code === '23505') { // doublon PostgreSQL
+      return res.status(409).json({ error: 'Login déjà utilisé' });
+    }
+
+    console.error(err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+
 router.post('/refresh', (req, res) => {
   const refresh = req.cookies?.refresh_token;
 
