@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import pool from '../../db/database.ts'
 import bcrypt from 'bcryptjs'
+import { requireAdmin } from '../middleware/auth-admin.ts'
 
 const router = Router()
 
@@ -9,6 +10,14 @@ router.get('/', async (_req, res) => {
   const { rows } = await pool.query('SELECT id, login, role FROM users')
   res.json(rows)
 })
+
+// Liste de tous les utilisateurs (réservée aux admins)
+router.get('/', requireAdmin, async (_req, res) => {
+  const { rows } = await pool.query(
+    'SELECT id, login, role FROM users ORDER BY id'
+  )
+  res.json(rows)
+}) 
 
 // Création d'un utilisateur
 router.post('/', async (req, res) => {
@@ -50,6 +59,16 @@ router.get('/:id', async (req, res) => {
     console.error(err)
     res.status(500).json({error: 'Erreur serveur'})
   }
+})
+
+// Récupération du profil utilisateur (authentifié)
+router.get('/me', async (req, res) => {
+  const user = req.user
+  const { rows } = await pool.query(
+    'SELECT id, login, role FROM users WHERE id=$1',
+    [user?.id]
+  )
+  res.json(rows[0]);
 })
 
 export default router

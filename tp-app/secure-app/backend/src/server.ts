@@ -44,8 +44,6 @@ app.use(cors({
 // Routes publiques
 app.use('/api/public', publicRouter)
 
-app.use('/api/users', usersRouter)
-
 app.use('/api/auth', authRouter)
 app.use('/api/users', verifyToken, usersRouter) // protégé
 app.use('/api/admin', verifyToken, requireAdmin, (req, res) => {

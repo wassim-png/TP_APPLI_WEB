@@ -4,28 +4,35 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import pool from '../../db/database.ts'
 import { verifyToken, createAccessToken, createRefreshToken } from '../middleware/token-managment.ts'
+import { JWT_SECRET } from '../config/en.ts'
+import type { TokenPayload } from '../types/token-payload.ts'
 
 const router = Router()
 
-router.post('/register', async (req: Request, res: Response) => {
-  const { login, password } = req.body
-  if (!login || !password) return res.status(400).json({ error: 'Champs manquants' })
+router.post('/refresh', (req, res) => {
+  const refresh = req.cookies?.refresh_token;
 
-  const hashed = await bcrypt.hash(password, 10)
+  if (!refresh) {
+    return res.status(401).json({ error: 'Refresh token manquant' });
+  }
 
   try {
-    const { rows } = await pool.query(
-      `INSERT INTO users (login, password_hash, role) VALUES ($1, $2, 'user') RETURNING id, login, role`,
-      [login, hashed]
-    )
-    res.status(201).json({ message: 'Utilisateur créé', user: rows[0] })
-  } catch (err: any) {
-    if (err.code === '23505') // doublon PostgreSQL
-      return res.status(409).json({ error: 'Login déjà utilisé' })
-    console.error(err)
-    res.status(500).json({ error: 'Erreur serveur' })
+    const decoded = jwt.verify(refresh, JWT_SECRET) as TokenPayload;
+    const newAccess = createAccessToken({ id: decoded.id, role: decoded.role });
+
+    res.cookie('access_token', newAccess, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.json({ message: 'Token renouvelé' });
+  } catch {
+    res.status(403).json({ error: 'Refresh token invalide ou expiré' });
   }
-})
+});
+
 
 router.post('/login', async (req: Request, res: Response) => {
   // --- LOGIN ---
@@ -69,9 +76,8 @@ router.post('/logout', (_req: Request, res: Response) => {
   res.json({ message: 'Déconnexion réussie' })
 })
 
-// ------ Exemple de route accessible uniquement avec un JWT valide ------
 router.get('/whoami', verifyToken, (req, res) => {
- res.json({ user: req.user })
+  res.json({ user: req.user })
 }) 
 
 
