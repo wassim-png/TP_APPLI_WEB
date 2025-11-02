@@ -10,7 +10,7 @@ import usersRouter from './routes/users.ts'
 import 'dotenv/config'
 import authRouter from './routes/auth.ts'
 import { verifyToken } from './middleware/token-managment.ts'
-import { requireAdmin } from './middleware/auth-admin.ts'
+import { requireAdmin } from './middleware/auth-admin.ts'   
 
 // Création de l’application Express
 const app = express()
