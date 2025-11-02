@@ -5,12 +5,6 @@ import { requireAdmin } from '../middleware/auth-admin.ts'
 
 const router = Router()
 
-// Liste des utilisateurs
-router.get('/', async (_req, res) => {
-  const { rows } = await pool.query('SELECT id, login, role FROM users')
-  res.json(rows)
-})
-
 // Liste de tous les utilisateurs (réservée aux admins)
 router.get('/', requireAdmin, async (_req, res) => {
   const { rows } = await pool.query(
@@ -42,6 +36,16 @@ router.post('/', async (req, res) => {
   }
 })
 
+// Récupération du profil utilisateur (authentifié)
+router.get('/me', async (req, res) => {
+  const user = req.user
+  const { rows } = await pool.query(
+    'SELECT id, login, role FROM users WHERE id=$1',
+    [user?.id]
+  )
+  res.json(rows[0]);
+})
+
 router.get('/:id', async (req, res) => {
   const { id } = req.params
   
@@ -61,14 +65,5 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-// Récupération du profil utilisateur (authentifié)
-router.get('/me', async (req, res) => {
-  const user = req.user
-  const { rows } = await pool.query(
-    'SELECT id, login, role FROM users WHERE id=$1',
-    [user?.id]
-  )
-  res.json(rows[0]);
-})
 
 export default router
