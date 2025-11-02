@@ -62,17 +62,24 @@ export class AuthService {
     }
     // --- Vérifie la session actuelle (cookie httpOnly) ---
     whoami() {
-        this._isLoading.set(true) ; this._error.set(null)
-        this.http.get<{ user: UserDto }>(`${environment.apiUrl}/auth/whoami`, { withCredentials: true })
-            .pipe(
-                tap(res => { this._currentUser.set(res?.user ?? null) }),
-                catchError(err => {
-                this._error.set('Session expirée') ; this._currentUser.set(null) ; return of(null)
-                }),
-                finalize(() => this._isLoading.set(false)),
-                catchError(() => of(null))
-            )
-            .subscribe(res => this._currentUser.set(res?.user ?? null))
+    this._isLoading.set(true);
+    this._error.set(null);
+    
+    this.http.get<{ user: UserDto }>(`${environment.apiUrl}/auth/whoami`, { withCredentials: true })
+        .pipe(
+        tap(res => {
+            this._currentUser.set(res?.user ?? null);
+            console.log('👤 Whoami:', res?.user);
+        }),
+        catchError(err => {
+            console.log('⚠️ Pas de session active');
+            this._error.set('Session expirée');
+            this._currentUser.set(null);
+            return of(null);
+        }),
+        finalize(() => this._isLoading.set(false))
+        )
+        .subscribe();
     }
     // --- Rafraîchissement pour l'interceptor ---
     refresh$() { // observable qui émet null en cas d'erreur

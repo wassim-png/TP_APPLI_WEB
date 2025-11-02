@@ -1,0 +1,21 @@
+<div class="home-container">
+  <h1>Page d'accueil</h1>
+
+  @if (isLoggedIn()) {
+    <div class="user-info">
+      <h2>Bienvenue, {{ currentUser()?.login }} !</h2>
+      <p>Rôle : <strong>{{ currentUser()?.role }}</strong></p>
+      
+      <button (click)="logout()" class="btn-logout">
+        Se déconnecter
+      </button>
+    </div>
+  } @else {
+    <div class="login-prompt">
+      <p>Vous n'êtes pas connecté.</p>
+      <a routerLink="/login" class="btn-login">
+        Aller à la page de connexion
+      </a>
+    </div>
+  }
+</div>
