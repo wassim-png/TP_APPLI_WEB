@@ -1,7 +1,7 @@
 import { Router } from 'express'
-import pool from '../../db/database.ts'
+import pool from '../db/database.js'
 import bcrypt from 'bcryptjs'
-import { requireAdmin } from '../middleware/auth-admin.ts'
+import { requireAdmin } from '../middleware/auth-admin.js'
 
 const router = Router()
 

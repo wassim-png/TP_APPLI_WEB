@@ -13,7 +13,7 @@ WORKDIR /usr/share/nginx/html
 # doit contenir le index.html et le reste)
 #COPY --from=build /app/dist/ /usr/share/nginx/html #ancienne version de Angular
 # Angular 20
-COPY --from=build /app/dist/frontend/browser/ /usr/share/nginx/html/
+COPY --from=build /app/dist/tp-app/browser/ /usr/share/nginx/html/
 # Copie du fichier de configuration nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80

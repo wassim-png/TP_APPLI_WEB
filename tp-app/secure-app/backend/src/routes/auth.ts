@@ -2,10 +2,10 @@ import { Router } from 'express'
 import type { Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
-import pool from '../../db/database.ts'
-import { verifyToken, createAccessToken, createRefreshToken } from '../middleware/token-managment.ts'
-import { JWT_SECRET } from '../config/en.ts'
-import type { TokenPayload } from '../types/token-payload.ts'
+import pool from '../db/database.js'
+import { verifyToken, createAccessToken, createRefreshToken } from '../middleware/token-managment.js'
+import { JWT_SECRET } from '../config/en.js'
+import type { TokenPayload } from '../types/token-payload.js'
 
 const router = Router()
 
@@ -27,14 +27,14 @@ router.post('/register', async (req, res) => {
     );
 
     res.status(201).json({ message: 'Utilisateur créé', user: rows[0] });
-  } catch (err) {
-    if (err.code === '23505') { // doublon PostgreSQL
-      return res.status(409).json({ error: 'Login déjà utilisé' });
-    }
-
-    console.error(err);
-    res.status(500).json({ error: 'Erreur serveur' });
+  } catch (err: any) {
+  if (err.code === '23505') { // doublon PostgreSQL
+    return res.status(409).json({ error: 'Login déjà utilisé' });
   }
+  console.error(err);
+  res.status(500).json({ error: 'Erreur serveur' });
+}
+
 });
 
 
